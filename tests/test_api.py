@@ -28,4 +28,15 @@ def test_upscale_oversize():
     big = io.BytesIO(b"0" * (10485760 + 1))
     response = client.post("/api/upscale", files={"file": ("big.jpg", big, "image/jpeg")})
     assert response.status_code == 400
-    assert "File too large" in response.text 
+    assert "File too large" in response.text
+
+def test_integration_upscale_flow():
+    img = make_image_bytes("png")
+    response = client.post("/api/upscale", files={"file": ("test.png", img, "image/png")})
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("image/")
+    # Check returned image is 2x size
+    from PIL import Image
+    out_img = Image.open(io.BytesIO(response.content))
+    assert out_img.size == (20, 20)
+    assert out_img.format == "PNG" 

@@ -81,7 +81,7 @@ upscaleBtn.addEventListener('click', async () => {
   formData.append('file', selectedFile);
 
   try {
-    const response = await fetch('/api/upscale', {
+    const response = await fetch('http://localhost:8000/api/upscale', {
       method: 'POST',
       body: formData
     });
