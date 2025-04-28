@@ -1,14 +1,19 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 import imghdr
 from backend.config.settings import settings
 from PIL import Image
 import io
 from typing import List
 import logging
+import os
 
 app = FastAPI(title="Simple Image Upscaler")
+
+# Mount the public directory as static files at the root
+app.mount("/", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "../public"), html=True), name="static")
 
 app.add_middleware(
     CORSMiddleware,
