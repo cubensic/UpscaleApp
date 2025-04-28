@@ -79,9 +79,10 @@ upscaleBtn.addEventListener('click', async () => {
 
   const formData = new FormData();
   formData.append('file', selectedFile);
+  
 
   try {
-    const response = await fetch('/api/upscale', {
+    const response = await fetch('https://upscale-app-mocha.vercel.app/api/upscale', {
       method: 'POST',
       body: formData
     });
