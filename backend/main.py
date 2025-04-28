@@ -12,7 +12,7 @@ app = FastAPI(title="Simple Image Upscaler")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Or specify your frontend's URL for more security
+    allow_origins=settings.cors_origins,  # Set this in your .env for production, e.g. ["https://yourfrontend.com"]
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -37,9 +37,19 @@ async def upscale_image(file: List[UploadFile] = File(...)):
         logging.warning("Validation failed: Multiple or no files uploaded.")
         raise HTTPException(status_code=400, detail="Please upload a single image file.")
     file = file[0]
+    # --- Robust file size check ---
+    # Check the raw upload size (if available)
+    if hasattr(file, 'spool_max_size') and hasattr(file.file, 'tell'):
+        pos = file.file.tell()
+        file.file.seek(0, 2)  # Seek to end
+        raw_size = file.file.tell()
+        file.file.seek(pos)   # Restore position
+        if raw_size > 10 * 1024 * 1024:
+            logging.warning(f"Validation failed: File too large (raw upload {raw_size} bytes).")
+            raise HTTPException(status_code=400, detail="File too large (max 10MB).")
     contents = await file.read()
     if len(contents) > 10 * 1024 * 1024:
-        logging.warning(f"Validation failed: File too large ({len(contents)} bytes).")
+        logging.warning(f"Validation failed: File too large (buffer {len(contents)} bytes).")
         raise HTTPException(status_code=400, detail="File too large (max 10MB).")
     # Validate file type
     if not file.content_type.startswith("image/"):

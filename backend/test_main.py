@@ -72,13 +72,13 @@ def test_upscale_oversized_file_with_check():
     # Create a fake image >10MB
     big_img = Image.new('RGB', (4000, 4000), (255, 0, 0))
     buf = io.BytesIO()
-    big_img.save(buf, format='PNG')
+    big_img.save(buf, format='BMP')  # Use BMP for no compression
     buf.seek(0)
     if buf.getbuffer().nbytes > 10 * 1024 * 1024:
-        raise HTTPException(status_code=400, detail="File too large (max 10MB).")
-    response = client.post('/api/upscale', files={'file': ('big.png', buf, 'image/png')})
-    assert response.status_code == 400 or response.status_code == 413
-    assert 'File too large' in response.text or 'too large' in response.text.lower()
+        response = client.post('/api/upscale', files={'file': ('big.bmp', buf, 'image/bmp')})
+        assert response.status_code == 400 or response.status_code == 413
+    else:
+        assert False, "Test image is not large enough!"
 
 
 @app.post("/api/upscale")

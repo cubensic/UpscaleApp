@@ -27,3 +27,4 @@ build/
 # Add .github/workflows/ to .gitignore exceptions
 !/.github/
 !/.github/workflows/ 
+.vercel
